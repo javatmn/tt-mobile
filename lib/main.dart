@@ -51,24 +51,26 @@ class HomePageState extends State<HomePage> {
             title: new Text('VPS切换(可能有短暂断流)'),
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.format_underlined, color: Colors.green),
-                title: Text('UDP模式(推荐)'),
+                leading: Icon(Icons.format_underlined, color: Colors.green,size: 48.0,),
+                title: Text('UDP模式'),
+                subtitle: Text('推荐'),
                 onTap: () {
                   Navigator.pop(context, Answers.YES);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.title, color: Colors.green),
-                title: Text('TCP模式(专供某些ISP)'),
+                leading: Icon(Icons.title, color: Colors.green,size: 48.0,),
+                title: Text('TCP模式'),
+                subtitle: Text('当UDP无效时使用'),
                 onTap: () {
-                  Navigator.pop(context, Answers.YES);
+                  Navigator.pop(context, Answers.NO);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.clear, color: Colors.red),
+                leading: Icon(Icons.clear, color: Colors.red,size: 48.0,),
                 title: Text('取消'),
                 onTap: () {
-                  Navigator.pop(context, Answers.YES);
+                  Navigator.pop(context, Answers.MAYBE);
                 },
               ),
             ],
@@ -84,6 +86,7 @@ class HomePageState extends State<HomePage> {
         _setValue('Maybe');
         break;
     }
+    print(_value);
   }
 
   @override
