@@ -21,6 +21,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String URL_GET_SERVER_LIST =
       "http://javatmn.us.to:1236/get_server_list";
+  final String URL_SWITCH_SERVER =
+      "http://javatmn.us.to:1236/switch_server";
   final style = TextStyle(color: Colors.blueAccent);
   final iconMoreVert = Icon(Icons.more_vert);
   final iconPlay = Icon(Icons.check_box_outline_blank);
@@ -41,6 +43,23 @@ class HomePageState extends State<HomePage> {
     setState(() {
       _serverList = json.decode(response.body);
     });
+
+    return "Successfull";
+  }
+
+  /*
+  **  switch server using RESTful API
+  */
+  Future<String> switch_server(ip, port, lmsPort) async {
+    var req = {
+      "ip": ip,
+      "port": port,
+      "lmsPort": lmsPort,
+    };
+    var response = await http.post(Uri.encodeFull(URL_SWITCH_SERVER),
+        body: json.encode(req));
+
+    print(response.body);
 
     return "Successfull";
   }
@@ -107,6 +126,7 @@ class HomePageState extends State<HomePage> {
         })) {
       case Answers.UDP:
         _setValue('udp');
+        //switch_server(ip, port, lmsPort)
         break;
       case Answers.TCP:
         _setValue('tcp');
