@@ -21,6 +21,9 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String URL_GET_SERVER_LIST =
       "http://javatmn.us.to:1236/get_server_list";
+  final style = TextStyle(color: Colors.blueAccent);
+  final iconMoreVert = Icon(Icons.more_vert);
+  final iconPlay = Icon(Icons.check_box_outline_blank);
   List _serverList;
   String _protocol = 'udp';
 
@@ -58,11 +61,15 @@ class HomePageState extends State<HomePage> {
                   color: Colors.green,
                   size: 48.0,
                 ),
-                title: Text('UDP模式'),
+                title: Text(
+                  'UDP模式',
+                  style: style,
+                ),
                 subtitle: Text('推荐'),
                 onTap: () {
                   Navigator.pop(context, Answers.UDP);
                 },
+                trailing: iconPlay,
               ),
               ListTile(
                 leading: Icon(
@@ -70,11 +77,15 @@ class HomePageState extends State<HomePage> {
                   color: Colors.green,
                   size: 48.0,
                 ),
-                title: Text('TCP模式'),
-                subtitle: Text('当UDP无效时使用'),
+                title: Text(
+                  'TCP模式',
+                  style: style,
+                ),
+                subtitle: Text('推荐UDP无效时使用'),
                 onTap: () {
                   Navigator.pop(context, Answers.TCP);
                 },
+                trailing: iconPlay,
               ),
               ListTile(
                 leading: Icon(
@@ -82,10 +93,14 @@ class HomePageState extends State<HomePage> {
                   color: Colors.red,
                   size: 48.0,
                 ),
-                title: Text('取消'),
+                title: Text(
+                  '取消',
+                  style: style,
+                ),
                 onTap: () {
                   Navigator.pop(context, Answers.NONE);
                 },
+                trailing: iconPlay,
               ),
             ],
           );
