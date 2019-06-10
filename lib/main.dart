@@ -62,6 +62,12 @@ class HomePageState extends State<HomePage> {
           headers: {"Accept": "application/json"});
     } catch (e) {
       print(e);
+      /*
+      Scaffold.of(context).showSnackBar(SnackBar(
+        content: Text('Box connection fail'),
+        duration: Duration(seconds: 3),
+      ),);*/
+      _serverList = null;
       return 1;
     }
 
@@ -206,12 +212,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final snackConnectFail = () => Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Box connection fail'),
-            duration: Duration(seconds: 3),
-          ),
-        );
     return Scaffold(
       appBar: AppBar(
         title: Text("TBox VPN Controller"),
