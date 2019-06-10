@@ -21,8 +21,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   final String URL_GET_SERVER_LIST =
       "http://javatmn.us.to:1236/get_server_list";
-  final String URL_SWITCH_SERVER =
-      "http://javatmn.us.to:1236/switch_server";
+  final String URL_SWITCH_SERVER = "http://javatmn.us.to:1236/switch_server";
   final style = TextStyle(color: Colors.blueAccent);
   final iconMoreVert = Icon(Icons.more_vert);
   final iconPlay = Icon(Icons.check_box_outline_blank);
@@ -50,11 +49,12 @@ class HomePageState extends State<HomePage> {
   /*
   **  switch server using RESTful API
   */
-  Future<String> switch_server(ip, port, lmsPort) async {
+  Future<String> switch_server(server) async {
     var req = {
-      "ip": ip,
-      "port": port,
-      "lmsPort": lmsPort,
+      "ip": server['ip'],
+      "port": server['port'],
+      "lmsPort": server['lmsPort'],
+      "protocol": _protocol,
     };
     var response = await http.post(Uri.encodeFull(URL_SWITCH_SERVER),
         body: json.encode(req));
@@ -67,7 +67,7 @@ class HomePageState extends State<HomePage> {
   /*
   **  switch server dialog
   */
-  Future<void> switch_user_dialog() async {
+  Future<void> switch_user_dialog(server) async {
     switch (await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -132,9 +132,11 @@ class HomePageState extends State<HomePage> {
         _setValue('tcp');
         break;
       case Answers.NONE:
+        return;
         break;
     }
     print(_protocol);
+    switch_server(server);
   }
 
   @override
@@ -163,7 +165,10 @@ class HomePageState extends State<HomePage> {
                         subtitle:
                             Text('Clients: ' + server['clients'].toString()),
                         trailing: Icon(Icons.more_vert),
-                        onTap: switch_user_dialog,
+                        onTap: () {
+                          switch_user_dialog(server);
+                        },
+                        selected: server['active'] == true,
                       ),
                     ],
                   ),
