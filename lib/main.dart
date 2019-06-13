@@ -48,7 +48,8 @@ class HomePageState extends State<HomePage> {
 
   void _setServerList(List list) => setState(() {
         _serverList = list;
-        _tabs[0] = _buildVpsTab();
+        _tabs[0] = _build_vps_tab();
+        _tabs[1] = build_stats_tab();
       });
 
   /*
@@ -177,7 +178,10 @@ class HomePageState extends State<HomePage> {
     switch_server(server);
   }
 
-  Widget _buildVpsTab() {
+  /*
+  **  Build VPS tab
+  */
+  Widget _build_vps_tab() {
     return ListView.builder(
         itemCount: _serverList == null ? 0 : _serverList.length,
         itemBuilder: (BuildContext context, int index) {
@@ -208,6 +212,101 @@ class HomePageState extends State<HomePage> {
             ],
           );
         });
+  }
+
+  /*
+  **  Build statistics tab
+  */
+  Widget build_stats_tab() {
+    final List<String> names = <String>['下行速率', '下行流量', '上行速率'];
+    final List<String> values = <String>['100', '200', '300.123'];
+    final List<String> units = <String>['bytes/s', '', 'bytes'];
+
+    return (ListView.separated(
+      padding: const EdgeInsets.only(
+        left: 8.0,
+        top: 8.0,
+        right: 8.0,
+      ),
+      itemCount: names.length,
+      itemBuilder: (BuildContext context, int index) {
+        var bg = index.isEven ? Colors.green[100]:Colors.amber[100];
+        return Container(
+          color: bg,
+          child: Row(children: <Widget>[
+            Flexible(
+              flex: 8,
+              fit: FlexFit.tight,
+              child: Text(
+                names[index] + " :",
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Spacer(flex: 1),
+            Flexible(
+              flex: 11,
+              fit: FlexFit.tight,
+              child: Text(
+                values[index],
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 5,
+              fit: FlexFit.tight,
+              child: Text(
+                units[index],
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ]),
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const Divider(
+            height: 6.0,
+          ),
+    ));
+    /*
+    return (Column(children: <Widget>[
+      Row(children: <Widget>[
+        Flexible(
+          flex: 3,
+          fit: FlexFit.tight,
+          child: Text('Name', textAlign: TextAlign.end),
+        ),
+        Spacer(flex: 1),
+        Flexible(
+          flex: 5,
+          fit: FlexFit.tight,
+          child: Text('Value', textAlign: TextAlign.start),
+        ),
+      ]),
+      Row(children: <Widget>[
+        Flexible(
+          flex: 3,
+          fit: FlexFit.tight,
+          child: Text('Name2', textAlign: TextAlign.end),
+        ),
+        Spacer(flex: 1),
+        Flexible(
+          flex: 5,
+          fit: FlexFit.tight,
+          child: Text('Value2', textAlign: TextAlign.start),
+        ),
+      ]),
+    ]));*/
   }
 
   @override
