@@ -218,9 +218,25 @@ class HomePageState extends State<HomePage> {
   **  Build statistics tab
   */
   Widget build_stats_tab() {
-    final List<String> names = <String>['下行速率', '下行流量', '上行速率'];
+    final List<String> labels = <String>[
+      '下行字节数',
+      '上行字节数',
+      '下行包数',
+      '上行包数',
+      '下行速率(字节/秒)',
+      '上行速率(字节/秒)',
+      '下行速率(包/秒)',
+      '上行速率(包/秒)',
+      '总流量(字节)',
+      '剩余流量(字节)',
+      '流量起始日期',
+      '流量结束日期',
+      '外网地址',
+      '有线MAC',
+      '无线MAC',
+      '客户编号',
+    ];
     final List<String> values = <String>['100', '200', '300.123'];
-    final List<String> units = <String>['bytes/s', '', 'bytes'];
 
     return (ListView.separated(
       padding: const EdgeInsets.only(
@@ -228,9 +244,9 @@ class HomePageState extends State<HomePage> {
         top: 8.0,
         right: 8.0,
       ),
-      itemCount: names.length,
+      itemCount: labels.length,
       itemBuilder: (BuildContext context, int index) {
-        var bg = index.isEven ? Colors.green[100]:Colors.amber[100];
+        var bg = index.isEven ? Colors.green[100] : Colors.amber[100];
         return Container(
           color: bg,
           child: Row(children: <Widget>[
@@ -238,7 +254,7 @@ class HomePageState extends State<HomePage> {
               flex: 8,
               fit: FlexFit.tight,
               child: Text(
-                names[index] + " :",
+                labels[index] + " :",
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   fontSize: 18.0,
