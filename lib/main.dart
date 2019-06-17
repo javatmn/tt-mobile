@@ -19,16 +19,34 @@ class HomePage extends StatefulWidget {
 **  Home page state
 */
 class HomePageState extends State<HomePage> {
-  final String URL_GET_SERVER_LIST =
+  static const String URL_GET_SERVER_LIST =
       "http://javatmn.us.to:1236/get_server_list";
-  final String URL_SWITCH_SERVER = "http://javatmn.us.to:1236/switch_server";
+  static const String URL_SWITCH_SERVER = "http://javatmn.us.to:1236/switch_server";
+  static const String URL_GET_CLIENT_INFO = "http://javatmn.us.to:1236/get_client_info";
   final blueTxtStyle = TextStyle(color: Colors.blueAccent);
   final iconMoreVert = Icon(Icons.more_vert);
   final iconFwd = Icon(Icons.arrow_forward);
+  Timer statsTimer;
 
   List _serverList;
   String _protocol = 'udp';
   int _selectedTab = 0;
+  var _clientInfo = {
+    'bytesOut': 0,
+    'bytesIn': 0,
+    'packetsOut': 0,
+    'packetsIn': 0,
+    'downRate': 0,
+    'upRate': 0,
+    'quota': 0,
+    'remain': 0,
+    'startTime': '',
+    'endTime': '',
+    'extIp': '',
+    'eMac': '',
+    'wMac': '',
+    'index': '',
+  };
 
   List<Widget> _tabs = <Widget>[
     Text(
@@ -49,7 +67,6 @@ class HomePageState extends State<HomePage> {
   void _setServerList(List list) => setState(() {
         _serverList = list;
         _tabs[0] = _build_vps_tab();
-        _tabs[1] = build_stats_tab();
       });
 
   /*
@@ -223,11 +240,9 @@ class HomePageState extends State<HomePage> {
       '上行字节数',
       '下行包数',
       '上行包数',
-      '下行速率(字节/秒)',
-      '上行速率(字节/秒)',
-      '下行速率(包/秒)',
-      '上行速率(包/秒)',
-      '总流量(字节)',
+      '20秒下行速率(字节/秒)',
+      '20秒上行速率(字节/秒)',
+      '流量配额(字节)',
       '剩余流量(字节)',
       '流量起始日期',
       '流量结束日期',
@@ -236,7 +251,22 @@ class HomePageState extends State<HomePage> {
       '无线MAC',
       '客户编号',
     ];
-    final List<String> values = <String>['100', '200', '300.123'];
+    List<String> values = <String>[
+      _clientInfo['bytesOut'].toString(),
+      _clientInfo['bytesIn'].toString(),
+      _clientInfo['packetsOut'].toString(),
+      _clientInfo['packetsIn'].toString(),
+      _clientInfo['downRate'].toString(),
+      _clientInfo['upRate'].toString(),
+      _clientInfo['quota'].toString(),
+      _clientInfo['remain'].toString(),
+      _clientInfo['startTime'],
+      _clientInfo['endTime'],
+      _clientInfo['extIp'],
+      _clientInfo['eMac'],
+      _clientInfo['wMac'],
+      _clientInfo['index'].toString(),
+    ];
 
     return (ListView.separated(
       padding: const EdgeInsets.only(
@@ -251,38 +281,37 @@ class HomePageState extends State<HomePage> {
           color: bg,
           child: Row(children: <Widget>[
             Flexible(
-              flex: 8,
+              flex: 9,
               fit: FlexFit.tight,
               child: Text(
-                labels[index] + " :",
-                textAlign: TextAlign.end,
+                labels[index],
+                //textAlign: TextAlign.end,
                 style: TextStyle(
-                  fontSize: 18.0,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-            Spacer(flex: 1),
             Flexible(
-              flex: 11,
+              flex: 1,
+              fit: FlexFit.tight,
+              child: Text(
+                ": ",
+                //textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 10,
               fit: FlexFit.tight,
               child: Text(
                 values[index],
                 textAlign: TextAlign.start,
                 style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            Flexible(
-              flex: 5,
-              fit: FlexFit.tight,
-              child: Text(
-                units[index],
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  fontSize: 18.0,
+                  fontSize: 14.0,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -294,35 +323,6 @@ class HomePageState extends State<HomePage> {
             height: 6.0,
           ),
     ));
-    /*
-    return (Column(children: <Widget>[
-      Row(children: <Widget>[
-        Flexible(
-          flex: 3,
-          fit: FlexFit.tight,
-          child: Text('Name', textAlign: TextAlign.end),
-        ),
-        Spacer(flex: 1),
-        Flexible(
-          flex: 5,
-          fit: FlexFit.tight,
-          child: Text('Value', textAlign: TextAlign.start),
-        ),
-      ]),
-      Row(children: <Widget>[
-        Flexible(
-          flex: 3,
-          fit: FlexFit.tight,
-          child: Text('Name2', textAlign: TextAlign.end),
-        ),
-        Spacer(flex: 1),
-        Flexible(
-          flex: 5,
-          fit: FlexFit.tight,
-          child: Text('Value2', textAlign: TextAlign.start),
-        ),
-      ]),
-    ]));*/
   }
 
   @override
@@ -358,5 +358,20 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     this.get_server_list();
+    statsTimer = Timer.periodic(Duration(seconds: 20), (Timer t) {
+      try {
+        Future<http.Response> response = http.get(Uri.encodeFull(URL_GET_CLIENT_INFO),
+            headers: {"Accept": "application/json"});
+        response.then((http.Response rsp){
+          print(rsp.body);
+          setState(() {
+            _clientInfo = json.decode(rsp.body);
+            _tabs[1] = build_stats_tab();
+          });
+        });
+      } catch (e) {
+        print(e);
+      }
+    });
   }
 }
