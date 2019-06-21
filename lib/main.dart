@@ -19,10 +19,12 @@ class HomePage extends StatefulWidget {
 **  Home page state
 */
 class HomePageState extends State<HomePage> {
-  static const String URL_GET_SERVER_LIST =
-      "http://javatmn.us.to:1236/get_server_list";
-  static const String URL_SWITCH_SERVER = "http://javatmn.us.to:1236/switch_server";
-  static const String URL_GET_CLIENT_INFO = "http://javatmn.us.to:1236/get_client_info";
+  String _boxIp = "javatmn.us.to";
+
+  String urlGetServerList = "http://javatmn.us.to:1236/get_server_list";
+  String urlSwitchServer = "http://javatmn.us.to:1236/switch_server";
+  String urlGetClientInfo = "http://javatmn.us.to:1236/get_client_info";
+
   final blueTxtStyle = TextStyle(color: Colors.blueAccent);
   final iconMoreVert = Icon(Icons.more_vert);
   final iconFwd = Icon(Icons.arrow_forward);
@@ -53,12 +55,18 @@ class HomePageState extends State<HomePage> {
       'Connecting to the BOX, please wait...',
     ),
     Text(
-      'Index 1: TODO Stats',
+      'Connecting to the BOX, please wait...',
     ),
     Text(
       'Index 2: TODO Settings',
     ),
   ];
+
+  void _set_url_string() {
+    urlGetServerList = "http://" + _boxIp + ":1236/get_server_list";
+    urlSwitchServer = "http://" + _boxIp + ":1236/switch_server";
+    urlGetClientInfo = "http://" + _boxIp + ":1236/get_client_info";
+  }
 
   void _setProtocol(String value) => setState(() => _protocol = value);
 
@@ -76,7 +84,7 @@ class HomePageState extends State<HomePage> {
     var response;
 
     try {
-      response = await http.get(Uri.encodeFull(URL_GET_SERVER_LIST),
+      response = await http.get(Uri.encodeFull(urlGetServerList),
           headers: {"Accept": "application/json"});
     } catch (e) {
       print(e);
@@ -108,7 +116,7 @@ class HomePageState extends State<HomePage> {
     var response;
 
     try {
-      response = await http.post(Uri.encodeFull(URL_SWITCH_SERVER),
+      response = await http.post(Uri.encodeFull(urlSwitchServer),
           body: json.encode(req));
     } catch (e) {
       print(e);
@@ -127,7 +135,7 @@ class HomePageState extends State<HomePage> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            title: Text('VPS切换(会有短暂断流)'),
+            title: Text('切换到此VPS?'),
             children: <Widget>[
               ListTile(
                 leading: Icon(
@@ -219,6 +227,9 @@ class HomePageState extends State<HomePage> {
                           Text('Clients: ' + server['clients'].toString()),
                       trailing: Icon(Icons.more_vert),
                       onTap: () {
+                        setState(() {
+                          _serverList[index]['active'] = true;
+                        });
                         switch_server_dialog(server);
                       },
                       selected: server['active'] == true,
@@ -229,6 +240,28 @@ class HomePageState extends State<HomePage> {
             ],
           );
         });
+  }
+
+  Widget build_settings_tab() {
+    return (Column(
+      children: <Widget>[
+        SizedBox(height: 8.0),
+        TextField(
+          //obscureText: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'TBox IP 地址',
+          ),
+          onChanged: (String val) {
+            _boxIp = val;
+          },
+          onSubmitted: (String val) {
+            print(val);
+            _set_url_string();
+          },
+        ),
+      ],
+    ));
   }
 
   /*
@@ -357,12 +390,16 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    this.get_server_list();
-    statsTimer = Timer.periodic(Duration(seconds: 20), (Timer t) {
+    _set_url_string();
+    //this.get_server_list();
+    _tabs[1] = build_stats_tab();
+    _tabs[2] = build_settings_tab();
+    var cb = (Timer t) {
       try {
-        Future<http.Response> response = http.get(Uri.encodeFull(URL_GET_CLIENT_INFO),
+        Future<http.Response> response = http.get(
+            Uri.encodeFull(urlGetClientInfo),
             headers: {"Accept": "application/json"});
-        response.then((http.Response rsp){
+        response.then((http.Response rsp) {
           print(rsp.body);
           setState(() {
             _clientInfo = json.decode(rsp.body);
@@ -372,6 +409,20 @@ class HomePageState extends State<HomePage> {
       } catch (e) {
         print(e);
       }
-    });
+      try {
+        Future<http.Response> response = http.get(
+            Uri.encodeFull(urlGetServerList),
+            headers: {"Accept": "application/json"});
+        response.then((http.Response rsp) {
+          print(rsp.body);
+          _setServerList(json.decode(rsp.body));
+        });
+      } catch (e) {
+        print(e);
+        _serverList = null;
+      }
+    };
+    statsTimer = Timer.periodic(Duration(seconds: 20), cb);
+    cb(statsTimer);
   }
 }
